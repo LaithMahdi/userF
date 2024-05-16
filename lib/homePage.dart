@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:user/panierPage.dart';
 import 'dart:convert';
-
 import 'ProductDetailsPage.dart';
 import 'side_menu_list.dart';
+import 'favoritesPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shrink_sidemenu/shrink_sidemenu.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -46,73 +47,71 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     getAllProduits();
     getUserIdFromSharedPrefs();
-     WidgetsBinding.instance!.addPostFrameCallback((_) {
-    showLikeDialog(); // Appelez showLikeDialog ici directement
-  });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showLikeDialog(); // Appelez showLikeDialog ici directement
+    });
   }
-void showLikeDialog() {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      bool isLiked = false; // État initial
 
-      return AlertDialog(
-        title: Text('Do you like our application?'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.thumb_up, color: Colors.green, size: 30), // Modifier la couleur en vert
-            onPressed: () {
-              // Mettre à jour l'état d'appréciation dans la base de données
-              updateLikeStatus(true); // Envoyer true pour liked
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Merci pour votre avis'),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.thumb_down, color: Colors.red, size: 30), // Modifier la couleur en rouge
-            onPressed: () {
-              // Mettre à jour l'état d'appréciation dans la base de données
-              updateLikeStatus(false); // Envoyer false pour liked
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Merci pour votre avis'),
-                ),
-              );
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+  void showLikeDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        bool isLiked = false; // État initial
 
-
-
- Future<void> updateLikeStatus(bool liked) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  userId = prefs.getString('userId'); // Utilisez la variable de classe userId
-
-  final url = Uri.parse('http://127.0.0.1:3000/user/feedback');
-  final body = json.encode({'userId': userId, 'liked': liked});
-
-  try {
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: body,
+        return AlertDialog(
+          title: Text('Do you like our application?'),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.thumb_up, color: Colors.green, size: 30), // Modifier la couleur en vert
+              onPressed: () {
+                // Mettre à jour l'état d'appréciation dans la base de données
+                updateLikeStatus(true); // Envoyer true pour liked
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Merci pour votre avis'),
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.thumb_down, color: Colors.red, size: 30), // Modifier la couleur en rouge
+              onPressed: () {
+                // Mettre à jour l'état d'appréciation dans la base de données
+                updateLikeStatus(false); // Envoyer false pour liked
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Merci pour votre avis'),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
-    final responseData = json.decode(response.body);
-    print(responseData['message']);
-  } catch (error) {
-    print(error);
   }
-}
 
+  Future<void> updateLikeStatus(bool liked) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('userId'); // Utilisez la variable de classe userId
+
+    final url = Uri.parse('http://127.0.0.1:3000/user/feedback');
+    final body = json.encode({'userId': userId, 'liked': liked});
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+      final responseData = json.decode(response.body);
+      print(responseData['message']);
+    } catch (error) {
+      print(error);
+    }
+  }
 
   Future<void> getUserIdFromSharedPrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -128,8 +127,91 @@ void showLikeDialog() {
     });
   }
 
+  Future<void> addProduitToFavorites(String produitId) async {
+    final url = Uri.parse('http://127.0.0.1:3000/favoir/ajouterProduit');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
+    final body = json.encode({'userId': userId, 'produitId': produitId});
 
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 201) {
+        print('Product added to favorites successfully');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Product added to favorites successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        print(responseData['message']);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(responseData['message']),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (error) {
+      print(error);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error adding product to favorites'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> addProduitToCart(String produitId) async {
+    final url = Uri.parse('http://127.0.0.1:3000/panier/ajouterProduit');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
+
+    final body = json.encode({'userId': userId, 'produitId': produitId});
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 201) {
+        print('Product added to cart successfully');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Product added to cart successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        print(responseData['message']);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(responseData['message']),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (error) {
+      print(error);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error adding product to cart'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -223,12 +305,23 @@ void showLikeDialog() {
               ],
               selectedIndex: 0,
               onTabChange: (index) {
-                if (index == 3) {
-                  showFeedbackDialog();
-                } else if (index == 1) {
-                  filterProductsByFavorites();
-                } else if (index == 0) {
+                if (index == 1) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FavoritesPage(),
+                    ),
+                  );
+                } else if(index ==2){
+                    Navigator.push(context,
+                    MaterialPageRoute(
+                      builder: (context) => PanierPage(),
+                      ),
+                     );
+                }else if (index == 0) {
                   getAllProduits();
+                } else if (index == 3) {
+                  showFeedbackDialog();
                 }
               },
             ),
@@ -258,15 +351,15 @@ void showLikeDialog() {
                   children: [
                     filteredProduits[index]['image'] != null
                         ? Center(
-                          child: Image.network(
+                            child: Image.network(
                               'http://127.0.0.1:3000/uploads/${filteredProduits[index]['image']}',
                               errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                                 return const Text('Image non disponible');
                               },
                               width: MediaQuery.sizeOf(context).width * .4,
-                             height: 100,
+                              height: 100,
                             ),
-                        )
+                          )
                         : const Text('Image non disponible'),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -290,19 +383,25 @@ void showLikeDialog() {
                       children: [
                         IconButton(
                           icon: Icon(
-                            filteredProduits[index]['isFavorite'] ? Icons.favorite : Icons.favorite_border,
-                            color: filteredProduits[index]['isFavorite'] ? Colors.red : null,
+                            Icons.favorite,
+                            color: filteredProduits[index]['isFavorite'] ? Colors.red : Colors.grey,
                           ),
-                          onPressed: () async {
+                          onPressed: () {
                             setState(() {
                               filteredProduits[index]['isFavorite'] = !filteredProduits[index]['isFavorite'];
                             });
+
+                            if (filteredProduits[index]['isFavorite']) {
+                              addProduitToFavorites(filteredProduits[index]['_id']);
+                            } else {
+                              // Remove from favorites logic here if needed
+                            }
                           },
                         ),
                         IconButton(
                           icon: Icon(Icons.add_shopping_cart),
                           onPressed: () {
-                            // Add the product to the cart
+                            addProduitToCart(filteredProduits[index]['_id']);
                           },
                         ),
                       ],
@@ -321,44 +420,24 @@ void showLikeDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        String feedbackText = '';
-
         return AlertDialog(
           title: Text('Feedback'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                onChanged: (value) {
-                  feedbackText = value;
-                },
-                decoration: InputDecoration(
-                  hintText: 'Enter your feedback...',
-                ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  addFeedback(feedbackText);
-                  Navigator.of(context).pop();
-                },
-                child: Text('Send'),
-              ),
-            ],
-          ),
+          content: Text('This is the feedback page'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Close'),
+            ),
+          ],
         );
       },
     );
   }
 
-  void filterProductsByFavorites() {
-    setState(() {
-      filteredProduits = produits.where((produit) => produit['isFavorite'] == true).toList();
-    });
-  }
-
-  Future<void> getProduitsByCat(String categoryId) async {
-    final url = Uri.parse('http://127.0.0.1:3000/produit/getbycat/$categoryId');
+  void getProduitsByCat(String catId) async {
+    final url = Uri.parse('http://127.0.0.1:3000/produit/category/$catId');
 
     try {
       final response = await http.get(url);
@@ -374,45 +453,4 @@ void showLikeDialog() {
       print(error);
     }
   }
-
-
-
-
-
-
-
-
-
-Future<void> addFeedback(String feedbackText) async {
-  final url = Uri.parse('http://127.0.0.1:3000/feedback/add');
-  final body = json.encode({'userId': userId, 'feedbackText': feedbackText});
-
-  try {
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: body,
-    );
-    final responseData = json.decode(response.body);
-    print(responseData['message']);
-    
-    // Afficher une alerte de succès
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green),
-            SizedBox(width: 10),
-            Text('Feedback sent successfully'),
-          ],
-        ),
-        backgroundColor: Color.fromARGB(255, 153, 175, 154),
-      ),
-    );
-  } catch (error) {
-    print(error);
-  }
 }
-
-  }
-

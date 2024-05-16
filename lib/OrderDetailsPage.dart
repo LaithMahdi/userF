@@ -7,8 +7,46 @@ class OrderDetailsPage extends StatelessWidget {
 
   OrderDetailsPage({required this.order});
 
+  static String getOrderID(dynamic order) {
+    if (order != null && order['_id'] != null) {
+      return order['_id'].toString();
+    } else {
+      return '';
+    }
+  }
+
+  Future<void> cancelOrder(BuildContext context, String commandeId) async {
+    try {
+      if (commandeId.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('ID de commande invalide')),
+        );
+        return;
+      }
+
+      final response = await http.delete(
+        Uri.parse('http://127.0.0.1:3000/commande/commandeannuler/$commandeId'),
+      );
+      
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Commande annulée avec succès')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur lors de l\'annulation de la commande')),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Une erreur s\'est produite')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    String commandeId = getOrderID(order);
 
     return Scaffold(
       appBar: AppBar(
@@ -82,7 +120,22 @@ class OrderDetailsPage extends StatelessWidget {
           ),
         ),
       ) : Center(child: Text('Aucune commande trouvée')),
-     
+      bottomNavigationBar: BottomAppBar(
+        color: Color.fromARGB(255, 188, 186, 204),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ElevatedButton(
+            onPressed: () {
+              cancelOrder(context, order['_id']);
+            },
+            style: ElevatedButton.styleFrom(
+              primary: Color(0xff19143b),
+              onPrimary: Colors.white,
+            ),
+            child: Text('Annuler la commande'),
+          ),
+        ),
+      ),
     );
   }
 }
