@@ -35,7 +35,7 @@ class _PanierPageState extends State<PanierPage> {
       return;
     }
 
-    final url = Uri.parse('http://127.0.0.1:3000/panier/user/$userId');
+    final url = Uri.parse('http://10.0.2.2:3000/panier/user/$userId');
 
     try {
       final response = await http.get(url);
@@ -57,13 +57,16 @@ class _PanierPageState extends State<PanierPage> {
       return;
     }
 
-    final url = Uri.parse('http://127.0.0.1:3000/panier/supprimer/$userId/$productId');
+    final url =
+        Uri.parse('http://10.0.2.2:3000/panier/supprimer/$userId/$productId');
 
     try {
       final response = await http.delete(url);
       if (response.statusCode == 200) {
         setState(() {
-          cartProducts = cartProducts.where((product) => product['produit']['_id'] != productId).toList();
+          cartProducts = cartProducts
+              .where((product) => product['produit']['_id'] != productId)
+              .toList();
         });
       } else {
         print('Failed to delete cart product');
@@ -105,15 +108,16 @@ class _PanierPageState extends State<PanierPage> {
                 children: [
                   product['image'] != null
                       ? Center(
-                        child: Image.network(
-                          'http://127.0.0.1:3000/uploads/${product['image']}',
-                          errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                            return const Text('Image non disponible');
-                          },
-                          width: MediaQuery.sizeOf(context).width * .4,
-                          height: 100,
-                        ),
-                      )
+                          child: Image.network(
+                            'http://10.0.2.2:3000/uploads/${product['image']}',
+                            errorBuilder: (BuildContext context,
+                                Object exception, StackTrace? stackTrace) {
+                              return const Text('Image non disponible');
+                            },
+                            width: MediaQuery.sizeOf(context).width * .4,
+                            height: 100,
+                          ),
+                        )
                       : const Text('Image non disponible'),
                   Padding(
                     padding: const EdgeInsets.all(8.0),

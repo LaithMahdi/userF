@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:user/OrdersPage.dart';
 import 'package:user/TestColorsScreen.dart';
+import 'package:user/core/constant/app_cache.dart';
 
 class SideMenuList extends StatelessWidget {
   final GlobalKey<SideMenuState> menuKey;
@@ -14,16 +15,16 @@ class SideMenuList extends StatelessWidget {
   final BuildContext context;
 
   const SideMenuList({
-    Key? key,
+    super.key,
     required this.menuKey,
     required this.getProduitsByCat,
     required this.getAllProduits,
     required this.context,
-  }) : super(key: key);
+  });
 
   Future<List<dynamic>> fetchCategories() async {
     final response =
-        await http.get(Uri.parse('http://127.0.0.1:3000/categorie/getall'));
+        await http.get(Uri.parse('http://10.0.2.2:3000/categorie/getall'));
 
     if (response.statusCode == 200) {
       return json.decode(response.body);
@@ -35,14 +36,14 @@ class SideMenuList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
       child: ListView(
         children: [
           ListTile(
             leading: Container(
               width: 200,
               height: 200,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/logo.png'),
                   fit: BoxFit.cover,
@@ -50,7 +51,9 @@ class SideMenuList extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 12,),
+          const SizedBox(
+            height: 12,
+          ),
           const Divider(
             color: Colors.black54,
           ),
@@ -89,7 +92,7 @@ class SideMenuList extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => OrdersPage()),
+                MaterialPageRoute(builder: (context) => const OrdersPage()),
               );
             },
           ),
@@ -113,7 +116,7 @@ class SideMenuList extends StatelessWidget {
             height: 40,
           ),
           ExpansionTile(
-            title: Row(
+            title: const Row(
               children: [
                 Icon(
                   Icons.category,
@@ -134,7 +137,7 @@ class SideMenuList extends StatelessWidget {
                 future: fetchCategories(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
+                    return const CircularProgressIndicator();
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else {
@@ -143,7 +146,7 @@ class SideMenuList extends StatelessWidget {
                         return ListTile(
                           title: Text(
                             snapshot.data![index]['name'],
-                            style: TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Colors.white),
                           ),
                           onTap: () {
                             getProduitsByCat(snapshot.data![index]['_id']);
@@ -186,7 +189,9 @@ class SideMenuList extends StatelessWidget {
       onTap: onTap,
       child: Container(
         alignment: Alignment.center,
-        margin: const EdgeInsets.symmetric(horizontal: 12,),
+        margin: const EdgeInsets.symmetric(
+          horizontal: 12,
+        ),
         padding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 12,
@@ -207,7 +212,10 @@ class SideMenuList extends StatelessWidget {
             ),
             Text(
               name,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white),
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white),
             )
           ],
         ),
@@ -216,8 +224,7 @@ class SideMenuList extends StatelessWidget {
   }
 
   void _logout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove('token'); // Supprimer le jeton
-    Navigator.pushReplacementNamed(context, '/'); // Aller à la page de connexion
+    AppCache().clearCache();
+    Navigator.pushReplacementNamed(context, '/');
   }
 }

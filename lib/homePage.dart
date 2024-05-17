@@ -25,7 +25,7 @@ class _HomePageState extends State<HomePage> {
   TextEditingController searchController = TextEditingController();
 
   Future<void> getAllProduits() async {
-    final url = Uri.parse('http://127.0.0.1:3000/produit/all');
+    final url = Uri.parse('http://10.0.2.2:3000/produit/all');
 
     try {
       final response = await http.get(url);
@@ -62,7 +62,8 @@ class _HomePageState extends State<HomePage> {
           title: Text('Do you like our application?'),
           actions: [
             IconButton(
-              icon: Icon(Icons.thumb_up, color: Colors.green, size: 30), // Modifier la couleur en vert
+              icon: Icon(Icons.thumb_up,
+                  color: Colors.green, size: 30), // Modifier la couleur en vert
               onPressed: () {
                 // Mettre à jour l'état d'appréciation dans la base de données
                 updateLikeStatus(true); // Envoyer true pour liked
@@ -75,7 +76,8 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             IconButton(
-              icon: Icon(Icons.thumb_down, color: Colors.red, size: 30), // Modifier la couleur en rouge
+              icon: Icon(Icons.thumb_down,
+                  color: Colors.red, size: 30), // Modifier la couleur en rouge
               onPressed: () {
                 // Mettre à jour l'état d'appréciation dans la base de données
                 updateLikeStatus(false); // Envoyer false pour liked
@@ -97,7 +99,7 @@ class _HomePageState extends State<HomePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('userId'); // Utilisez la variable de classe userId
 
-    final url = Uri.parse('http://127.0.0.1:3000/user/feedback');
+    final url = Uri.parse('http://10.0.2.2:3000/user/feedback');
     final body = json.encode({'userId': userId, 'liked': liked});
 
     try {
@@ -122,13 +124,17 @@ class _HomePageState extends State<HomePage> {
 
   void searchProduits(String query) {
     setState(() {
-      filteredProduits = produits.where((produit) =>
-          produit['name'].toString().toLowerCase().contains(query.toLowerCase())).toList();
+      filteredProduits = produits
+          .where((produit) => produit['name']
+              .toString()
+              .toLowerCase()
+              .contains(query.toLowerCase()))
+          .toList();
     });
   }
 
   Future<void> addProduitToFavorites(String produitId) async {
-    final url = Uri.parse('http://127.0.0.1:3000/favoir/ajouterProduit');
+    final url = Uri.parse('http://10.0.2.2:3000/favoir/ajouterProduit');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userId = prefs.getString('userId');
 
@@ -171,7 +177,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> addProduitToCart(String produitId) async {
-    final url = Uri.parse('http://127.0.0.1:3000/panier/ajouterProduit');
+    final url = Uri.parse('http://10.0.2.2:3000/panier/ajouterProduit');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userId = prefs.getString('userId');
 
@@ -277,7 +283,8 @@ class _HomePageState extends State<HomePage> {
         bottomNavigationBar: Container(
           color: Color(0xff19143b),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 20.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 15.0, vertical: 20.0),
             child: GNav(
               backgroundColor: Color(0xff19143b),
               color: Colors.white,
@@ -312,13 +319,14 @@ class _HomePageState extends State<HomePage> {
                       builder: (context) => FavoritesPage(),
                     ),
                   );
-                } else if(index ==2){
-                    Navigator.push(context,
+                } else if (index == 2) {
+                  Navigator.push(
+                    context,
                     MaterialPageRoute(
                       builder: (context) => PanierPage(),
-                      ),
-                     );
-                }else if (index == 0) {
+                    ),
+                  );
+                } else if (index == 0) {
                   getAllProduits();
                 } else if (index == 3) {
                   showFeedbackDialog();
@@ -341,7 +349,8 @@ class _HomePageState extends State<HomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ProductDetailsPage(product: filteredProduits[index]),
+                    builder: (context) =>
+                        ProductDetailsPage(product: filteredProduits[index]),
                   ),
                 );
               },
@@ -352,8 +361,9 @@ class _HomePageState extends State<HomePage> {
                     filteredProduits[index]['image'] != null
                         ? Center(
                             child: Image.network(
-                              'http://127.0.0.1:3000/uploads/${filteredProduits[index]['image']}',
-                              errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                              'http://10.0.2.2:3000/uploads/${filteredProduits[index]['image']}',
+                              errorBuilder: (BuildContext context,
+                                  Object exception, StackTrace? stackTrace) {
                                 return const Text('Image non disponible');
                               },
                               width: MediaQuery.sizeOf(context).width * .4,
@@ -384,15 +394,19 @@ class _HomePageState extends State<HomePage> {
                         IconButton(
                           icon: Icon(
                             Icons.favorite,
-                            color: filteredProduits[index]['isFavorite'] ? Colors.red : Colors.grey,
+                            color: filteredProduits[index]['isFavorite']
+                                ? Colors.red
+                                : Colors.grey,
                           ),
                           onPressed: () {
                             setState(() {
-                              filteredProduits[index]['isFavorite'] = !filteredProduits[index]['isFavorite'];
+                              filteredProduits[index]['isFavorite'] =
+                                  !filteredProduits[index]['isFavorite'];
                             });
 
                             if (filteredProduits[index]['isFavorite']) {
-                              addProduitToFavorites(filteredProduits[index]['_id']);
+                              addProduitToFavorites(
+                                  filteredProduits[index]['_id']);
                             } else {
                               // Remove from favorites logic here if needed
                             }
@@ -437,7 +451,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void getProduitsByCat(String catId) async {
-    final url = Uri.parse('http://127.0.0.1:3000/produit/category/$catId');
+    final url = Uri.parse('http://10.0.2.2:3000/produit/category/$catId');
 
     try {
       final response = await http.get(url);

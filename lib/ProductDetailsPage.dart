@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart'; 
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final Map<String, dynamic> product;
@@ -40,7 +40,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     String userId = prefs.getString('userId') ?? '';
 
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:3000/commande/passer-commande'),
+      Uri.parse('http://10.0.2.2:3000/commande/passer-commande'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -78,32 +78,36 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              widget.product['image'] != null 
-                ? Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      image: DecorationImage(
-                        image: NetworkImage('http://127.0.0.1:3000/uploads/${widget.product['image']}'),
-                        fit: BoxFit.cover,
+              widget.product['image'] != null
+                  ? Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        image: DecorationImage(
+                          image: NetworkImage(
+                              'http://10.0.2.2:3000/uploads/${widget.product['image']}'),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    )
+                  : Container(
+                      width: 200,
+                      height: 200,
+                      child: Center(
+                        child: Text(
+                          'Image not available',
+                          style: TextStyle(fontSize: 16),
+                        ),
                       ),
                     ),
-                  )
-                : Container(
-                    width: 200,
-                    height: 200,
-                    child: Center(
-                      child: Text(
-                        'Image not available',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  ),
               SizedBox(height: 20),
               Text(
                 widget.product['name'],
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Color(0xff19143b)),
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                    color: Color(0xff19143b)),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 10),
@@ -115,7 +119,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               SizedBox(height: 20),
               Text(
                 'Description:',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xff19143b)),
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Color(0xff19143b)),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 5),
@@ -130,7 +137,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 children: [
                   Text(
                     'Quantity: ',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xff19143b)),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: Color(0xff19143b)),
                   ),
                   SizedBox(width: 10),
                   IconButton(
@@ -145,7 +155,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   ),
                   Text(
                     _quantity.toString(),
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xff19143b)),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: Color(0xff19143b)),
                   ),
                   IconButton(
                     icon: Icon(Icons.add),
@@ -165,7 +178,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   style: ElevatedButton.styleFrom(
                     primary: Color(0xff19143b),
                   ),
-                  child: Text('Place Order', style: TextStyle(color: Colors.white)),
+                  child: Text('Place Order',
+                      style: TextStyle(color: Colors.white)),
                 ),
               ),
             ],

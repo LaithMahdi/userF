@@ -1,27 +1,41 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart'; // Importer SharedPreferences
+import 'package:user/core/constant/app_cache.dart';
 
 import 'homePage.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.delayed(Duration.zero, () {
+      if (AppCache().getToken().isNotEmpty) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      }
+    });
+  }
+
   bool _obscureText = true;
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   String _errorMessage = '';
 
   Future<void> _login() async {
     try {
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:3000/user/login'),
+        Uri.parse('http://10.0.2.2:3000/user/login'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -36,19 +50,18 @@ class _LoginPageState extends State<LoginPage> {
         String token = responseData['mytoken'];
 
         // Stocker le token localement
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('token', token);
+        AppCache().setToken(token);
 
         // Extraire le userId du token
         String userId = _extractUserIdFromToken(token);
-        prefs.setString('userId', userId); // userId récupéré depuis le token
+        AppCache().setUserId(userId);
 
         // Afficher l'ID de l'utilisateur dans la console
-        print('User ID: $userId');
+        print('--------------User ID ------------ $userId');
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomePage()),
+          MaterialPageRoute(builder: (context) => const HomePage()),
         );
       } else if (response.statusCode == 401) {
         setState(() {
@@ -85,8 +98,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -101,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
               _inputField(context),
               Text(
                 _errorMessage,
-                style: TextStyle(color: Colors.red),
+                style: const TextStyle(color: Colors.red),
               ),
               _signup(context),
             ],
@@ -112,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _header() {
-    return Column(
+    return const Column(
       children: [
         Text(
           "Welcome Back",
@@ -135,7 +146,7 @@ class _LoginPageState extends State<LoginPage> {
               borderRadius: BorderRadius.circular(18),
               borderSide: BorderSide.none,
             ),
-            fillColor: Color(0xff19143b).withOpacity(0.1),
+            fillColor: const Color(0xff19143b).withOpacity(0.1),
             filled: true,
             prefixIcon: const Icon(Icons.email),
           ),
@@ -149,7 +160,7 @@ class _LoginPageState extends State<LoginPage> {
               borderRadius: BorderRadius.circular(18),
               borderSide: BorderSide.none,
             ),
-            fillColor: Color(0xff19143b).withOpacity(0.1),
+            fillColor: const Color(0xff19143b).withOpacity(0.1),
             filled: true,
             prefixIcon: const Icon(Icons.lock),
             suffixIcon: IconButton(
@@ -170,7 +181,7 @@ class _LoginPageState extends State<LoginPage> {
           style: ElevatedButton.styleFrom(
             shape: const StadiumBorder(),
             padding: const EdgeInsets.symmetric(vertical: 16),
-            backgroundColor: Color(0xff19143b),
+            backgroundColor: const Color(0xff19143b),
           ),
           child: const Text(
             "Login",
